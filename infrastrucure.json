@@ -1,0 +1,46 @@
+{
+	"region": "us-east-1",
+	"resources": [{
+		"type": "loadbalancer",
+		"id": "LB",
+		"config": {
+			"server": {
+				"cpu": 2,
+				"ram":4,
+				"os": "ubuntu",
+				"waitFor": "$DB"
+			},
+			"servers": 2
+		}
+	},
+	{
+		"type": "cdn",
+		"id": "CDN",
+		"config": {
+			"defaultSource": "$LB",
+			"sources": [{
+				"path": "/static/*",
+				"source": "$BUCKET"
+			}]
+		}
+	},
+	{
+		"type": "database",
+		"id": "DB",
+		"config": {
+			"password": "****",
+			"engine": "MySQL"
+		}
+	},
+	{
+		"type": "dns",
+		"config": {
+			"from": "www.mydomain.com",
+			"to": "$CDN"
+		}
+	},
+	{
+		"type": "bucket",
+		"id": "BUCKET"
+	}]
+}
