@@ -72,6 +72,7 @@ list.focus();
 
 function open(i) {
 	screen.log('open(' + i + ')');
+	// List servers:
 	if (i === 0) {
 		loading();
 		require('./lib/listServers.js')(function(err, instanceIds) {
@@ -116,7 +117,9 @@ function open(i) {
 			}
 			screen.render(); 
 		});
-	} else if (i === 1) {
+	} 
+	// Create servers
+	else if (i === 1) {
 		loading();
 		require('./lib/listAMIs.js')(function(err, result) {
 			loaded();
@@ -179,7 +182,9 @@ function open(i) {
 			}
 			screen.render(); 
 		});
-	} else if (i === 2) {
+	} 
+	// Terminate server
+	else if (i === 2) {
 		loading();
 		require('./lib/listServers.js')(function(err, instanceIds) {
 			loaded();
@@ -218,7 +223,52 @@ function open(i) {
 			}
 			screen.render(); 
 		});
-	} else {
+	} 
+	// Perform backup:
+	// Select DB to backup
+	// Select what STAGING/DEV/etc.. DB to refresh
+	// Need ability to copy code form STAG/DEV to PROD:
+	else if (i === 3) {
+		loading();
+		require('./lib/listServers.js')(function(err, instanceIds) {
+			loaded();
+			if (err) {
+				log('error', 'listServers cb err: ' + err);
+			} else {
+				var instanceList = blessed.list({
+					fg: 'white',
+					bg: 'blue',
+					selectedBg: 'green',
+					mouse: true,
+					keys: true,
+					vi: true,
+					items: instanceIds
+				});
+				content.append(instanceList);
+				instanceList.focus();
+				instanceList.on('select', function(ev, i) {
+					loading();
+					require('./lib/terminateServer.js')(instanceIds[i], function(err) {
+						loaded();
+						if (err) {
+							log('error', 'terminateServer cb err: ' + err);
+						} else {
+							var serverContent = blessed.box({  
+								fg: 'white',
+								bg: 'blue',
+								content: 'terminating ...'
+							});
+							content.append(serverContent);
+						}
+						screen.render(); 
+					});
+				});
+				screen.render(); 
+			}
+			screen.render(); 
+		});
+	} 
+	else {
 		log('error', 'not supported');
 		screen.render(); 
 	}
